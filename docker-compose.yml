@@ -1,0 +1,31 @@
+version: "3.3"
+
+services:
+    php:
+        build: ./docker/php
+        restart: always
+        volumes:
+            - ./src:/var/www/html/
+    nginx:
+        image: nginx
+        ports:
+            - "80:80"
+        volumes:
+            - ./src:/var/www/html/
+            - ./docker/nginx/site.conf:/etc/nginx/sites-enabled/site.conf
+            - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+        restart: always
+
+    postgres:
+        image: "postgres"
+        restart: always
+        ports:
+          - "5432:5432"
+        environment:
+          - POSTGRES_PASSWORD=password
+          - POSTGRES_USER=admin
+          - POSTGRES_DB=authsignal
+        volumes:
+          - postgres-data:/var/lib/postgresql/data/
+volumes:
+    postgres-data:
