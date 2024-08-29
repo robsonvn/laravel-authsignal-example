@@ -24,8 +24,6 @@ Step by step instructions on how to integrate Authsignal with your Laravel appli
 Before you begin, ensure you have met the following requirements:
 
 - **Docker** installed on your local machine (required for Laravel Sail).
-- **Composer** installed globally.
-- **Node.js** and **NPM** installed globally.
 
 ### Installation
 
