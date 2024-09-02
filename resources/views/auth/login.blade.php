@@ -1,14 +1,27 @@
+<script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        const passkeyResponse = await authsignal.passkey.signIn({
+            autofill: true,
+        });
+
+        if (passkeyResponse.token) {
+            document.getElementById('passkey').value = passkeyResponse.token;
+            document.querySelector('form').submit();
+        }
+    });
+</script>
 <x-guest-layout>
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     <form method="POST" action="{{ route('login') }}">
         @csrf
+        <input type="hidden" name="passkey" id="passkey" />
 
         <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autoComplete="username webauthn"/>
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 

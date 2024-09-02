@@ -27,8 +27,9 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
+            'passkey' => ['required_without_all:email,password', 'nullable','string' ],
+            'email' => ['required_without:passkey', 'nullable', 'string', 'email'],
+            'password' => ['required_without:passkey', 'nullable', 'string'],
         ];
     }
 
@@ -40,13 +41,25 @@ class LoginRequest extends FormRequest
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
+        if ($passkey = $this->input('passkey')) {
+            $response = \Authsignal::validateChallenge($passkey);
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+            if ($response['state'] === 'CHALLENGE_SUCCEEDED' && $response['isValid']) {
+                Auth::loginUsingId($response['userId']);
+            } else {
+                RateLimiter::hit($this->throttleKey());
+                throw ValidationException::withMessages([
+                    'passkey' => 'Unable to authenticate with passkey. Please try again.',
+                ]);
+            }
+        } else {
+            if (! Auth::attemptWhen($this->only('email', 'password'), [[\App\Actions\AuthsignalLoginAction::class, 'handle']], $this->boolean('remember'))) {
+                RateLimiter::hit($this->throttleKey());
 
-            throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
-            ]);
+                throw ValidationException::withMessages([
+                    'email' => trans('auth.failed'),
+                ]);
+            }
         }
 
         RateLimiter::clear($this->throttleKey());
