@@ -54,7 +54,7 @@ Before you begin, ensure you have met the following requirements:
    Laravel Sail makes it easy to start your development environment using Docker:
 
    ```bash
-   ./vendor/bin/sail up -d
+   docker compose up -d
    ```
 
    This will start the application in a Docker container. Once it's running, you can access the application at [http://localhost](http://localhost).
@@ -62,7 +62,8 @@ Before you begin, ensure you have met the following requirements:
 4. **Install dependencies:**
 
    ```bash
-   ./vendor/bin/sail composer install
+   docker compose exec laravel.test composer install
+   ./vendor/bin/sail artisan key:generate
    ./vendor/bin/sail npm install
    ```
 
